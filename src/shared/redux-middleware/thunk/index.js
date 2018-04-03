@@ -1,5 +1,5 @@
 function createThunkMiddleware(extraArgument) {
-    const injectMiddlewareApi =  ({ dispatch, getState }) => {
+    const thunkMiddlewareApiInjector =  ({ dispatch, getState }) => {
 
         console.log('In Thunk, inject dispatch and getState api from Redux')
 
@@ -7,9 +7,9 @@ function createThunkMiddleware(extraArgument) {
          * @param next next Action handler of next middleware
          * @returns {thunkActionHandler}
          */
-        const nextActionHanlderInjector = next => {
+        const nextActionHandlerInjector = next => {
 
-            console.log('In thunk\'s nextActionHanlderInjector, next action handler is:', next)
+            console.log('In thunk\'s nextActionHandlerInjector, next action handler is:', next)
 
             const thunkActionHandler = action => {
 
@@ -25,10 +25,10 @@ function createThunkMiddleware(extraArgument) {
             return thunkActionHandler;
         }
 
-        return nextActionHanlderInjector;
+        return nextActionHandlerInjector;
     }
 
-    return injectMiddlewareApi;
+    return thunkMiddlewareApiInjector;
 }
 
 const thunk = createThunkMiddleware();

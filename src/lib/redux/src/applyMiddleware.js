@@ -18,10 +18,19 @@ import compose from './compose'
  */
 export default function applyMiddleware(...middlewares) {
     return (createStore) => (reducer, preloadedState, enhancer) => {
+
+        // Recursive call createStore to get return value.
         const store = createStore(reducer, preloadedState, enhancer)
+        // store = {
+        //    dispatch,
+        //    getState,
+        //    ...
+        // }
+
         let dispatch = store.dispatch
         let chain = []
 
+        // Declare middleware APIs to inject to middleware.
         const middlewareAPI = {
             getState: store.getState,
             dispatch: (action) => dispatch(action)
@@ -29,12 +38,33 @@ export default function applyMiddleware(...middlewares) {
 
         console.group('Apply middlewares');
 
+        // Huh, sound so familiar. If you see my logger or redux-thunk code, parameters of every middleware is very middlewareAPI
+
+        // Now, loop through and call each middlewares and to get a chain of Next-action-handler injectors. What is the Next-action-handler injectors? I am about to explain. For shortly, we agree Next-action-handler injector is NAHInjector
+
         console.group('1. Create chain')
+        // We have
+        // middlewares = [thunkMiddlewareApiInjector, loggerMiddlewareApiInjector]
         chain = middlewares.map(middleware => middleware(middlewareAPI))
+        // => chain = [thunkNAHInjector, loggerNAHInjector]
         console.groupEnd()
 
         console.group('2. Compose chain')
-        dispatch = compose(...chain)(store.dispatch)
+        let composedChain = compose(...chain)
+        // => composedChain = (args) => thunkNAHInjector(loggerNAHInjector(args))
+        // => composedChain = (args) => thunkNAHInjector(loggerActionHandler)
+        // => composedChain = (args) => thunkActionHandler // Thunk-middleware action handler
+
+        // You see that. "loggerActionHandler" is the parameter of "thunkNAHInjector". So to write a middleware, we always have a NAHInjector to retrieve the action handler of the right-next middleware.
+
+        dispatch = composedChain(store.dispatch)
+        // So. the next action handler that was injected to loggerNAHInjector (last middleware in chain) was primitive dispatch function
+        // Or we can say, the last middleware in the chains of middleware will receive primitive dispatch function as the next action handler.
+
+        // Now we have
+        // dispatch = composedChain(store.dispatch)
+        // => dispatch = thunkActionHandler
+
         console.groupEnd();
 
         console.group('3. Override primitive dispatch function')

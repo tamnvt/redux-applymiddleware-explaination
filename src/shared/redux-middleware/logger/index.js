@@ -1,5 +1,5 @@
 const createLoggerMiddleware = () => {
-    const injectMiddlewareApi = ({ dispatch, getState }) => { // loggerMiddleware
+    const loggerMiddlewareApiInjector = ({ dispatch, getState }) => {
 
         console.log('In Logger, inject dispatch and getState api from Redux')
 
@@ -7,9 +7,9 @@ const createLoggerMiddleware = () => {
          * @param next Action handler of next middleware
          * @returns {loggerActionHandler}
          */
-        const nextActionHanlderInjector = next => {
+        const nextActionHandlerInjector = next => {
 
-            console.log('In Logger\'s nextActionHanlderInjector, next action handler is:', next)
+            console.log('In Logger\'s nextActionHandlerInjector, next action handler is:', next)
 
             const loggerActionHandler = (action) => { // Action handler
 
@@ -28,10 +28,10 @@ const createLoggerMiddleware = () => {
             return loggerActionHandler;
         }
 
-        return nextActionHanlderInjector
+        return nextActionHandlerInjector
     }
 
-    return injectMiddlewareApi;
+    return loggerMiddlewareApiInjector;
 }
 
 export default createLoggerMiddleware();
